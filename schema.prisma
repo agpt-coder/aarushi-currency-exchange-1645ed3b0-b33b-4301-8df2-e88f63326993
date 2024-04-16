@@ -1,0 +1,90 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+model User {
+  id              String          @id @default(dbgenerated("gen_random_uuid()"))
+  email           String          @unique
+  password        String
+  role            UserRole        @default(USER)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  lastLoginAt     DateTime?
+  CurrencyQueries CurrencyQuery[]
+  AuthToken       AuthToken[]
+}
+
+model CurrencyQuery {
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
+  baseCurrency   String
+  targetCurrency String
+  exchangeRate   Float
+  timestamp      DateTime @default(now())
+  userId         String
+  User           User     @relation(fields: [userId], references: [id])
+}
+
+model ExternalAPI {
+  id         String                 @id @default(dbgenerated("gen_random_uuid()"))
+  name       String
+  apiKey     String
+  baseUrl    String
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  // Assuming one table for simplicity, could be normalized further if needed.
+  RateLimits ExternalAPIRateLimit[]
+}
+
+model ExternalAPIRateLimit {
+  id             String      @id @default(dbgenerated("gen_random_uuid()"))
+  externalApiId  String
+  ExternalAPI    ExternalAPI @relation(fields: [externalApiId], references: [id])
+  limit          Int
+  remaining      Int
+  resetTimestamp DateTime
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model AuthToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  User      User     @relation(fields: [userId], references: [id])
+}
+
+model LogEntry {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  level     LogLevel
+  message   String
+  timestamp DateTime @default(now())
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  PREMIUM
+}
+
+enum LogLevel {
+  INFO
+  WARNING
+  ERROR
+  DEBUG
+}
+

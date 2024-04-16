@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "aarushi-currency-exchange-1"
+version = "0.1.0"
+description = "The endpoint design is focused on performing currency conversions by accepting a base currency and optionally one or more target currency codes. Leveraging the Python programming language with the FastAPI framework, the application will provide fast, asynchronous API responses. The backend will interact with PostgreSQL through Prisma, an ORM that offers robust data management and ease of use for Python developers."
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+bcrypt = "^3.2.0"
+fastapi = "^0.70.0"
+httpx = "^0.23.0"
+prisma = "*"
+pydantic = "*"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
